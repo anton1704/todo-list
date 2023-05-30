@@ -4,7 +4,12 @@
       <div class="text-3xl text-center pt-10">Mach das!</div>
       <todo-text-input-vue @item-added="addItemToList"></todo-text-input-vue>
     </header>
-    <todo-list ref="testVier" :items="listItems"> </todo-list>
+    <todo-list
+      ref="testVier"
+      :items="listItems"
+      :list-name="listName"
+      @list-name-updated="updateListName"
+    />
   </div>
 </template>
 
@@ -20,7 +25,8 @@ export default {
   },
   data() {
     return {
-      listItems: []
+      listItems: [],
+      listName: 'My List'
     }
   },
   methods: {
@@ -28,6 +34,9 @@ export default {
       this.listItems.push({ text: value, done: false, icon: 'default' })
       console.log(this.listItems)
       this.$refs.testVier.reloadList()
+    },
+    updateListName(newName) {
+      this.listName = newName
     }
   }
 }

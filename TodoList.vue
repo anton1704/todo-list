@@ -1,5 +1,9 @@
 <template>
   <div>
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-2xl font-semibold">{{ listName }}</h2>
+      <DxButton class="dx-button-size" icon="edit" @click="editListName" />
+    </div>
     <DxList
       :data-source="listItems"
       :ref="listRefId"
@@ -15,7 +19,7 @@
           <div :class="{ 'line-through text-slate-300': data.done }">
             <b>{{ data.text }}</b>
             <br />
-            <span v-if="data.date">To be done until: {{ formatDate(data.date) }}</span>
+            <span v-if="data.date">Zu erledigen bis: {{ formatDate(data.date) }}</span>
           </div>
           <div>
             <DxButton
@@ -59,6 +63,11 @@ export default {
   props: {
     items: {
       type: Array,
+      required: true
+    },
+
+    listName: {
+      type: String,
       required: true
     }
   },
@@ -122,6 +131,13 @@ export default {
     formatDate(date, e) {
       const options = { year: 'numeric', month: 'long', day: 'numeric' }
       return new Date(date).toLocaleDateString(undefined, options)
+    },
+
+    editListName() {
+      const newName = prompt('Enter new name:', this.listName)
+      if (newName) {
+        this.$emit('list-name-updated', newName)
+      }
     }
   },
 
