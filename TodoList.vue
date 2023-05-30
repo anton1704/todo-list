@@ -10,19 +10,29 @@
       :selection-mode="selectionMode"
       @selectionChanged="onSelectionChange"
     >
-      <template #list-item="{ data }">
-        <div class="flex items-center">
-          <div class="w-full flex justify-between items-center">
-            <div :class="{ 'line-through text-slate-300': data.done }">
-              <b>{{ data.text }}</b>
-            </div>
-            <div>
-              <DxButton
-                class="flex items-center justify-center dx-button-size"
-                icon="edit"
-                @click="editItem(data, $event)"
-              />
-            </div>
+      <template #list-item="{ data, index }">
+        <div class="flex justify-between items-center">
+          <div :class="{ 'line-through text-slate-300': data.done }">
+            <b>{{ data.text }}</b>
+            <br />
+            <span v-if="data.date">To be done until: {{ formatDate(data.date) }}</span>
+          </div>
+          <div>
+            <DxButton
+              class="flex items-center justify-center dx-button-size"
+              icon="edit"
+              @click="editItem(data, $event)"
+            />
+            <DxButton
+              class="flex items-center justify-center dx-button-size"
+              icon="event"
+              @click="toggleCalendar(index, $event)"
+            />
+            <DxCalendar
+              v-if="showCalendarIndex === index"
+              :value="data.date"
+              @valueChanged="onDateChange(data, $event)"
+            />
           </div>
         </div>
       </template>
@@ -33,7 +43,8 @@
 <script>
 import DxCheckBox from 'devextreme-vue/check-box'
 import DxList from 'devextreme-vue/list'
-import { DxButton } from 'devextreme-vue'
+import DxButton from 'devextreme-vue/button'
+import DxCalendar from 'devextreme-vue/calendar'
 
 const listRefId = 'superSache'
 
@@ -41,7 +52,8 @@ export default {
   components: {
     DxCheckBox,
     DxList,
-    DxButton
+    DxButton,
+    DxCalendar
   },
 
   props: {
@@ -57,7 +69,8 @@ export default {
       listRefId,
       allowDeletion: true,
       itemDeleteMode: 'static',
-      selectionMode: 'all'
+      selectionMode: 'all',
+      showCalendarIndex: -1
     }
   },
 
@@ -89,6 +102,26 @@ export default {
         item.text = newText
       }
       e.event.stopPropagation()
+    },
+
+    toggleCalendar(index, e) {
+      if (this.showCalendarIndex === index) {
+        this.showCalendarIndex = -1
+      } else {
+        this.showCalendarIndex = index
+      }
+      e.event.stopPropagation()
+    },
+
+    onDateChange(item, event) {
+      item.date = event.value
+      this.showCalendarIndex = -1
+      event.event.stopPropagation()
+    },
+
+    formatDate(date, e) {
+      const options = { year: 'numeric', month: 'long', day: 'numeric' }
+      return new Date(date).toLocaleDateString(undefined, options)
     }
   },
 
