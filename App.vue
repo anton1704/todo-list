@@ -1,42 +1,38 @@
 <template>
   <div id="app">
-    <header class="bg-slate-400 text-white h-64">
+    <header class="bg-slate-400 text-white h-32">
       <div class="text-3xl text-center pt-10">Mach das!</div>
-      <todo-text-input-vue @item-added="addItemToList"></todo-text-input-vue>
+      <DxButton class="ml-2" @click="addNewList">Neue Liste</DxButton>
     </header>
-    <todo-list
-      ref="testVier"
-      :items="listItems"
-      :list-name="listName"
-      @list-name-updated="updateListName"
-    />
+    <TodoListContainer :lists="lists" @update-lists="updateLists" />
   </div>
 </template>
 
 <script>
-import TodoTextInputVue from './components/TodoTextInput.vue'
-import TodoList from './components/TodoList.vue'
+import TodoListContainer from './components/TodoListContainer.vue'
+import DxButton from 'devextreme-vue/button'
 
 export default {
   name: 'App',
   components: {
-    TodoTextInputVue,
-    TodoList
+    TodoListContainer,
+    DxButton
   },
   data() {
     return {
-      listItems: [],
-      listName: 'My List'
+      lists: []
     }
   },
   methods: {
-    addItemToList(value) {
-      this.listItems.push({ text: value, done: false, icon: 'default' })
-      console.log(this.listItems)
-      this.$refs.testVier.reloadList()
+    addNewList() {
+      const newList = {
+        name: 'Neue Liste',
+        items: []
+      }
+      this.lists.push(newList)
     },
-    updateListName(newName) {
-      this.listName = newName
+    updateLists(updatedLists) {
+      this.lists = updatedLists
     }
   }
 }

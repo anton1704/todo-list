@@ -1,9 +1,22 @@
 <template>
   <div>
-    <div class="flex justify-between items-center mb-4">
+    <div class="flex items-center justify-center mb-4 pt-2">
       <h2 class="text-2xl font-semibold">{{ listName }}</h2>
-      <DxButton class="dx-button-size" icon="edit" @click="editListName" />
+      <DxButton
+        class="ml-2 flex items-center justify-center dx-button-size"
+        icon="edit"
+        @click="editListName"
+      />
     </div>
+    <DxTextBox
+      class="text-black w-1/4 ml-[38%]"
+      v-model:value="textInputValue"
+      mode="url"
+      label="Eingabe"
+      label-mode="floating"
+      @enter-key="handleEnterKey"
+      @input="handleInput"
+    />
     <DxList
       :data-source="listItems"
       :ref="listRefId"
@@ -45,16 +58,17 @@
 </template>
 
 <script>
-import DxCheckBox from 'devextreme-vue/check-box'
+import { DxTextBox } from 'devextreme-vue/text-box'
 import DxList from 'devextreme-vue/list'
 import DxButton from 'devextreme-vue/button'
 import DxCalendar from 'devextreme-vue/calendar'
+import Swal from 'sweetalert2'
 
 const listRefId = 'superSache'
 
 export default {
   components: {
-    DxCheckBox,
+    DxTextBox,
     DxList,
     DxButton,
     DxCalendar
@@ -65,7 +79,6 @@ export default {
       type: Array,
       required: true
     },
-
     listName: {
       type: String,
       required: true
@@ -74,19 +87,33 @@ export default {
 
   data() {
     return {
-      listItems: this.items,
       listRefId,
       allowDeletion: true,
       itemDeleteMode: 'static',
       selectionMode: 'all',
-      showCalendarIndex: -1
+      showCalendarIndex: -1,
+      listItems: this.items,
+      textInputValue: ''
+    }
+  },
+
+  computed: {
+    isInputValid() {
+      const regex = /^[a-zA-Z0-9]+(?:\s[a-zA-Z0-9]+)*$/
+      const minLength = 3
+      const maxLength = 20
+      return (
+        this.textInputValue.length >= minLength &&
+        this.textInputValue.length <= maxLength &&
+        regex.test(this.textInputValue.trim())
+      )
     }
   },
 
   methods: {
     reloadList() {
-      this.list.reload()
-      this.list.repaint()
+      this.$refs[listRefId].instance.reload()
+      this.$refs[listRefId].instance.repaint()
     },
 
     onSelectionChange(value) {
@@ -128,7 +155,7 @@ export default {
       event.event.stopPropagation()
     },
 
-    formatDate(date, e) {
+    formatDate(date) {
       const options = { year: 'numeric', month: 'long', day: 'numeric' }
       return new Date(date).toLocaleDateString(undefined, options)
     },
@@ -138,12 +165,21 @@ export default {
       if (newName) {
         this.$emit('list-name-updated', newName)
       }
-    }
-  },
+    },
 
-  computed: {
-    list() {
-      return this.$refs[listRefId].instance
+    handleEnterKey() {
+      if (!this.isInputValid) {
+        Swal.fire({
+          title: 'Vorsicht',
+          text: 'Der eingegebene Text ist nicht zulässig!',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        })
+      } else {
+        this.items.push({ text: this.textInputValue, done: false, icon: 'default' })
+        this.reloadList()
+        this.textInputValue = ''
+      }
     }
   }
 }
